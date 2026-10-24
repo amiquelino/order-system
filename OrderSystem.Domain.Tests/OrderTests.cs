@@ -125,7 +125,11 @@ public class OrderTests
 
         order.ConfirmPayment();
 
-        order.Status.Should().Be(OrderStatus.Confirmed);
+        // Deliberately wrong assertion — CI quickstart Scenario B
+        // (specs/002-add-continuous-integration-that/quickstart.md).
+        // Reverted before merge; exists only to prove a single broken
+        // tier is identifiable from the run summary.
+        order.Status.Should().Be(OrderStatus.PaymentFailed);
     }
 
     [Theory]
