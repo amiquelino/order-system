@@ -86,11 +86,14 @@ no manual step, and reports pass/fail without requiring local reproduction.
 
 **Independent Test**: quickstart.md Scenario A.
 
-- [ ] T007 [US1] Run quickstart.md Scenario A (push a clean commit on a
+- [X] T007 [US1] Run quickstart.md Scenario A (push a clean commit on a
   scratch branch) and confirm: the run starts automatically with no manual
   trigger (SC-001), all four jobs from Phase 2 report success (SC-002),
   and total wall-clock time from push to every job finishing is under 15
-  minutes (SC-003)
+  minutes (SC-003) — confirmed via the actual push of this feature's own
+  commit to `main` (run 40121826061): started automatically with no manual
+  trigger, all four jobs passed, slowest job (`end-to-end-tests`) 2m57s,
+  total run ~3 minutes.
 
 **Checkpoint**: User Story 1 confirmed working on its own, independent of
 any pull request.
@@ -104,10 +107,13 @@ PR page — no new job or code beyond Phase 2's `pull_request` trigger.
 
 **Independent Test**: quickstart.md Scenario B (the PR-visibility half).
 
-- [ ] T008 [US2] Run quickstart.md Scenario B (open a pull request) and
+- [X] T008 [US2] Run quickstart.md Scenario B (open a pull request) and
   confirm: the PR shows an in-progress state while jobs are running, and
   the final result directly on the PR page once they finish — without
-  needing to leave the PR to learn it
+  needing to leave the PR to learn it — confirmed via PR #1 (`gh pr
+  checks`): showed `pending` on 3 jobs and an already-failed `Unit tests`
+  job within 18s, then final pass/fail per job once all finished. PR
+  closed without merging (T011).
 
 **Checkpoint**: Both user stories 1 and 2 confirmed working together.
 
@@ -122,10 +128,14 @@ summary alone — no new job or code beyond Phase 2's per-tier job split.
 half — reuses the same pull request as T008, with exactly one tier
 deliberately broken).
 
-- [ ] T009 [US3] Within the same quickstart.md Scenario B pull request,
+- [X] T009 [US3] Within the same quickstart.md Scenario B pull request,
   confirm the run's summary shows exactly the one job matching the broken
   tier as failed, visually distinct from the other three jobs, which still
-  report success — without opening that job's log (SC-004)
+  report success — without opening that job's log (SC-004) — confirmed:
+  broke `OrderTests.ConfirmPayment_FromPaymentPending_SetsConfirmed` on
+  purpose; final `gh pr checks` showed `Unit tests (Domain + Application)`
+  as `fail` and `Adapter integration tests` / `End-to-end tests` /
+  `Frontend checks` all `pass`, distinguishable from the summary alone.
 
 **Checkpoint**: All three user stories confirmed independently.
 
@@ -133,10 +143,13 @@ deliberately broken).
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T010 [P] Add a CI status badge near the top of `README.md`
+- [X] T010 [P] Add a CI status badge near the top of `README.md`
   (`https://github.com/amiquelino/order-system/actions/workflows/ci.yml/badge.svg`)
-- [ ] T011 Clean up the quickstart scratch branches and pull request
-  created during T007–T009 (quickstart.md "Cleanup" section)
+- [X] T011 Clean up the quickstart scratch branches and pull request
+  created during T007–T009 (quickstart.md "Cleanup" section) — PR #1
+  closed without merging, remote and local `ci-quickstart-broken` branch
+  deleted, stale remote-tracking ref pruned. No scratch branch was needed
+  for T007 — the feature's own real commit to `main` served that purpose.
 
 ---
 
