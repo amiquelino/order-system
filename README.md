@@ -1,8 +1,10 @@
 # OrderSystem
 
+[![CI](https://github.com/amiquelino/order-system/actions/workflows/ci.yml/badge.svg)](https://github.com/amiquelino/order-system/actions/workflows/ci.yml)
+
 A study project exploring **Hexagonal Architecture**, **CQRS**, and **event-driven communication** (Kafka + RabbitMQ) in .NET, orchestrated locally with **.NET Aspire**, with a **Next.js** frontend consuming the API over REST and SignalR.
 
-> Every use case is implemented and verified end-to-end, including the full payment lifecycle: `POST /orders` persists an order, attempts a (simulated) payment, and pushes each status change (`Created` → `PaymentPending` → `Confirmed`/`PaymentFailed`) to SignalR clients live, publishing a Kafka event at every transition. A declined payment schedules a delayed retry on RabbitMQ; if it keeps failing it retries up to 3 times before settling permanently as `PaymentFailed`. `GET /orders/{id}` reads current status back (404 if unknown); `POST /orders/{id}/cancel` transitions to `Cancelled` (404 if unknown, 409 if already cancelled or confirmed). See **Payment retry flow** below for exactly how that works and how it was verified.
+> Every use case is implemented and verified end-to-end, including the full payment lifecycle: `POST /orders` persists an order, reserves its items, and attempts a (simulated) payment, pushing each status change (`Created` → `PaymentPending` → `Confirmed`/`PaymentFailed`) to SignalR clients live and publishing a Kafka event at every transition. A declined payment schedules a delayed retry on RabbitMQ; if it keeps failing it retries up to 3 times, then releases the reservation and resolves to `Cancelled` instead of staying stuck. `GET /orders/{id}` reads current status back (404 if unknown); `POST /orders/{id}/cancel` transitions to `Cancelled` and releases any reservation too (404 if unknown, 409 if already cancelled or confirmed). See **Payment retry flow** and **Saga orchestration & compensation** below for exactly how that works and how it was verified.
 
 ## Architecture overview
 

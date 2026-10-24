@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+    branches: [main]
+
+jobs:
+  domain-and-application-tests:
+    name: Unit tests (Domain + Application)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - run: dotnet test OrderSystem.Domain.Tests
+
+      - run: dotnet test OrderSystem.Application.Tests
+
+  adapter-integration-tests:
+    name: Adapter integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      # Docker already ships running on ubuntu-latest, so Testcontainers
+      # needs nothing extra here (research.md Decision 3).
+      - run: dotnet test OrderSystem.Adapters.IntegrationTests
+
+  end-to-end-tests:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: order-system-frontend/package-lock.json
+
+      # Required before Aspire can start the frontend resource — see
+      # README.md "Prerequisites".
+      - name: Install frontend dependencies
+        run: npm install
+        working-directory: order-system-frontend
+
+      - name: Build the end-to-end test project
+        run: dotnet build OrderSystem.EndToEndTests
+
+      # --with-deps needs real root, which this hosted runner has (unlike
+      # the local dev environment's workaround — research.md Decision 4).
+      - name: Install Playwright Chromium
+        run: pwsh bin/Debug/net10.0/playwright.ps1 install --with-deps chromium
+        working-directory: OrderSystem.EndToEndTests
+
+      - run: dotnet test OrderSystem.EndToEndTests
+
+  frontend-checks:
+    name: Frontend checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: order-system-frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: order-system-frontend/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run build
