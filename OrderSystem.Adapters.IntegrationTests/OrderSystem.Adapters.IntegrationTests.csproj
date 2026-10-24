@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AwesomeAssertions" Version="9.5.0" />
+    <PackageReference Include="Bogus" Version="35.6.5" />
+    <PackageReference Include="Confluent.Kafka" Version="2.15.0" />
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.2.1" />
+    <PackageReference Include="Testcontainers.Kafka" Version="4.13.0" />
+    <PackageReference Include="Testcontainers.PostgreSql" Version="4.13.0" />
+    <PackageReference Include="Testcontainers.RabbitMq" Version="4.13.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <Using Include="AwesomeAssertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OrderSystem.Domain\OrderSystem.Domain.csproj" />
+    <ProjectReference Include="..\OrderSystem.Application\OrderSystem.Application.csproj" />
+    <ProjectReference Include="..\OrderSystem.Adapters.Postgres\OrderSystem.Adapters.Postgres.csproj" />
+    <ProjectReference Include="..\OrderSystem.Adapters.Kafka\OrderSystem.Adapters.Kafka.csproj" />
+    <ProjectReference Include="..\OrderSystem.Adapters.RabbitMQ\OrderSystem.Adapters.RabbitMQ.csproj" />
+  </ItemGroup>
+
+</Project>

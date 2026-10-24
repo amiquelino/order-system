@@ -1,0 +1,31 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.4.6">
+
+  <ItemGroup>
+    <ProjectReference Include="..\OrderSystem.Api\OrderSystem.Api.csproj" />
+    <ProjectReference Include="..\OrderSystem.MigrationService\OrderSystem.MigrationService.csproj" />
+    <ProjectReference Include="..\OrderSystem.NotificationService\OrderSystem.NotificationService.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.4.6" />
+    <PackageReference Include="Aspire.Hosting.Kafka" Version="13.4.6" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.4.6" />
+    <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.4.6" />
+    <PackageReference Include="Aspire.Hosting.Redis" Version="13.4.6" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>e164a1a6-270d-41e7-90a8-9e44e5476a43</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Lets OrderSystem.EndToEndTests reference the top-level-statement Program
+         class (internal by default) via DistributedApplicationTestingBuilder. -->
+    <InternalsVisibleTo Include="OrderSystem.EndToEndTests" />
+  </ItemGroup>
+
+</Project>
