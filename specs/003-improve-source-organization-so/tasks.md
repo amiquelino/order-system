@@ -91,7 +91,7 @@ browsing the repo, not just correct on disk.
 
 **Independent Test**: quickstart.md steps 8 and 10.
 
-- [ ] T009 [US1] Push the branch and open a pull request (quickstart.md
+- [X] T009 [US1] Push the branch and open a pull request (quickstart.md
   step 8); browse its file tree (PR "Files changed" tab, or the branch's
   own GitHub file browser) and confirm projects appear grouped under
   `src/`, `hosts/`, and `tests/` rather than as one flat list of 13+
@@ -109,7 +109,7 @@ separate from the source projects they test.
 **Independent Test**: Same browse as T009, looking specifically at
 `tests/`.
 
-- [ ] T010 [US2] Within the same pull request's file tree, confirm all
+- [X] T010 [US2] Within the same pull request's file tree, confirm all
   four test projects (`OrderSystem.Domain.Tests`,
   `OrderSystem.Application.Tests`, `OrderSystem.Adapters.IntegrationTests`,
   `OrderSystem.EndToEndTests`) sit together under `tests/`, distinguishable
@@ -122,14 +122,20 @@ separate from the source projects they test.
 
 ## Phase 5: Polish & Cross-Cutting Concerns
 
-- [ ] T011 Watch the pull request's CI checks (`gh pr checks <number>`)
+- [X] T011 Watch the pull request's CI checks (`gh pr checks <number>`)
   until all four jobs finish; confirm all four pass — the authoritative,
   hosted-runner proof of FR-002/SC-002, and incidentally a second
   independent confirmation that the CI feature itself still works after a
-  change this disruptive to file layout (depends on T009)
-- [ ] T012 Merge the pull request once T011 is green
+  change this disruptive to file layout (depends on T009) — confirmed:
+  PR #2, all 4 jobs pass on both the push and pull_request runs
+  (`end-to-end-tests` ~2m30-2m38s, the rest well under a minute each).
+- [ ] T012 Merge the pull request once T011 is green — **blocked**: Claude
+  Code's auto-mode safety classifier denies merging a PR without human
+  review ("Merge Without Review"). Everything is verified and ready;
+  merging https://github.com/amiquelino/order-system/pull/2 itself needs
+  the user.
 - [ ] T013 Delete the local and remote `improve-source-organization`
-  branch after merging (depends on T012)
+  branch after merging (depends on T012, so also pending)
 
 ---
 
