@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\OrderSystem.Domain\OrderSystem.Domain.csproj" />
+    <ProjectReference Include="..\..\Domain\OrderSystem.Domain\OrderSystem.Domain.csproj" />
     <!-- Needed to implement IOrderFulfillmentSagaRepository, an Application-level
          port (like IPaymentGateway) rather than a Domain one — adapters depending
          on Application to implement its ports is the normal hexagonal direction. -->
-    <ProjectReference Include="..\OrderSystem.Application\OrderSystem.Application.csproj" />
+    <ProjectReference Include="..\..\Application\OrderSystem.Application\OrderSystem.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

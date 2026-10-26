@@ -30,7 +30,7 @@ single change Phase 2 makes, not separate implementation.
 
 ## Phase 1: Setup
 
-- [ ] T001 Create branch `improve-source-organization` from `main`;
+- [X] T001 Create branch `improve-source-organization` from `main`;
   scaffold the target directories: `src/Domain`, `src/Application`,
   `src/Adapters`, `hosts`, `tests` (quickstart.md step 1)
 
@@ -44,29 +44,40 @@ single change Phase 2 makes, not separate implementation.
 between T002 and T005 — there is no safe place to stop partway through
 this phase.
 
-- [ ] T002 `git mv` all 13 project directories per data-model.md's move
+- [X] T002 `git mv` all 13 project directories per data-model.md's move
   table (depends on T001)
-- [ ] T003 [P] Apply all 26 `<ProjectReference>` edits across the 11
+- [X] T003 [P] Apply all 24 `<ProjectReference>` edits across the 12
   `.csproj` files that have one, per data-model.md's reference table
-  (depends on T002)
-- [ ] T004 [P] Apply all 13 `<Project Path>` edits in `OrderSystem.slnx`,
+  (depends on T002) — corrected count; plan.md/data-model.md originally
+  said 26/11, actual is 24/12
+- [X] T004 [P] Apply all 13 `<Project Path>` edits in `OrderSystem.slnx`,
   per data-model.md (depends on T002)
-- [ ] T005 Run `dotnet build OrderSystem.slnx` and fix any remaining
+- [X] T005 Run `dotnet build OrderSystem.slnx` and fix any remaining
   reference mismatch against data-model.md until it builds clean — this
   is FR-002's first gate, before touching CI config or docs (depends on
   T003, T004)
-- [ ] T006 [P] Apply the 5 path edits in `.github/workflows/ci.yml`, per
+- [X] T006 [P] Apply the 5 path edits in `.github/workflows/ci.yml`, per
   data-model.md (depends on T005)
-- [ ] T007 [P] Apply every path edit in `README.md` (Running the
+- [X] T007 [P] Apply every path edit in `README.md` (Running the
   application, Database schema, Automated tests, Solution layout), per
-  data-model.md (depends on T005)
-- [ ] T008 Run the full local test suite —
+  data-model.md (depends on T005) — a follow-up sweep found one inline
+  prose path data-model.md's table missed (`OrderSystem.Application/Sagas/`
+  in the "Saga orchestration" section); fixed too.
+- [X] T008 Run the full local test suite —
   `dotnet test tests/OrderSystem.Domain.Tests`,
   `dotnet test tests/OrderSystem.Application.Tests`,
   `dotnet test tests/OrderSystem.Adapters.IntegrationTests` (needs
   Docker), `dotnet test tests/OrderSystem.EndToEndTests` (needs Docker) —
   and confirm the same pass/fail results as on `main` before this change
-  (depends on T005)
+  (depends on T005) — Domain.Tests 21/21, Application.Tests 36/36,
+  Adapters.IntegrationTests 9/9, all identical to pre-move. EndToEndTests
+  **failed first** (`TimeoutException` waiting for the frontend resource)
+  — a real regression this gate was supposed to catch: `AppHost.cs`'s
+  `AddJavaScriptApp("frontend", "../order-system-frontend")` is a
+  string-literal relative path, not a `<ProjectReference>`, so the
+  planning-phase audit missed it. Fixed to `"../../order-system-frontend"`
+  (AppHost moved one level deeper); re-ran, 1/1 pass. Documented in
+  data-model.md for the record.
 
 **Checkpoint**: The move is complete and verified locally. Nothing is
 pushed yet.

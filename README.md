@@ -76,7 +76,7 @@ If Visual Studio doesn't recognize `.slnx` yet, update to the latest VS 2022 rel
 ### Option B — CLI
 
 ```bash
-dotnet run --project OrderSystem.AppHost
+dotnet run --project hosts/OrderSystem.AppHost
 ```
 
 This does the same thing as pressing F5: builds everything, starts the containers, starts the Api and NotificationService, starts the Next.js dev server, and prints the Aspire dashboard URL to the console.
@@ -87,10 +87,10 @@ Useful for quick iteration on just the API or just the frontend, but you lose au
 
 ```bash
 # API only (http://localhost:5016)
-dotnet run --project OrderSystem.Api
+dotnet run --project hosts/OrderSystem.Api
 
 # Notification service only (http://localhost:5017) — needed for the status page's live push
-dotnet run --project OrderSystem.NotificationService
+dotnet run --project hosts/OrderSystem.NotificationService
 
 # Frontend only
 cd order-system-frontend
@@ -99,14 +99,14 @@ npm run dev
 
 ## Database schema (EF Core migrations)
 
-Migrations live in `OrderSystem.Adapters.Postgres/Migrations/` (the project that owns `OrderDbContext`). They're applied by `OrderSystem.MigrationService`, a small worker that calls `Database.MigrateAsync()` once and exits — the Api itself never touches schema. When run via Aspire (`dotnet run --project OrderSystem.AppHost`), the AppHost runs the migration service to completion before starting the Api (`.WaitForCompletion(migrationService)` in `AppHost.cs`), so the schema is always up to date automatically.
+Migrations live in `src/Adapters/OrderSystem.Adapters.Postgres/Migrations/` (the project that owns `OrderDbContext`). They're applied by `OrderSystem.MigrationService`, a small worker that calls `Database.MigrateAsync()` once and exits — the Api itself never touches schema. When run via Aspire (`dotnet run --project hosts/OrderSystem.AppHost`), the AppHost runs the migration service to completion before starting the Api (`.WaitForCompletion(migrationService)` in `AppHost.cs`), so the schema is always up to date automatically.
 
 The `dotnet-ef` CLI tool is pinned as a local tool in `.config/dotnet-tools.json` — run `dotnet tool restore` once after cloning to get it. To add a new migration after changing the `Order` model or `OrderDbContext`:
 
 ```bash
 dotnet ef migrations add <MigrationName> \
-  --project OrderSystem.Adapters.Postgres \
-  --startup-project OrderSystem.MigrationService \
+  --project src/Adapters/OrderSystem.Adapters.Postgres \
+  --startup-project hosts/OrderSystem.MigrationService \
   -o Migrations
 ```
 
@@ -114,7 +114,7 @@ To apply migrations manually against a database (e.g. when running the Api stand
 
 ```bash
 ConnectionStrings__orderdb="Host=localhost;Port=5432;Database=orderdb;Username=postgres;Password=postgres" \
-  dotnet run --project OrderSystem.MigrationService
+  dotnet run --project hosts/OrderSystem.MigrationService
 ```
 
 ## Multi-instance support
@@ -155,7 +155,7 @@ The $5000 (always-declines) tier's new exhausted-retries-resolve-to-`Cancelled` 
 
 ## Saga orchestration & compensation
 
-Payment retries used to be the end of the story: once all 3 attempts failed, the order was abandoned mid-flow in `PaymentFailed` forever — nothing released, no path forward. `OrderFulfillmentSagaOrchestrator` (`OrderSystem.Application/Sagas/`) replaces that dead end with a real two-step saga:
+Payment retries used to be the end of the story: once all 3 attempts failed, the order was abandoned mid-flow in `PaymentFailed` forever — nothing released, no path forward. `OrderFulfillmentSagaOrchestrator` (`src/Application/OrderSystem.Application/Sagas/`) replaces that dead end with a real two-step saga:
 
 1. **Reserve** — `IInventoryService` reserves the order's items before any payment attempt is made. `SimulatedInventoryService` always succeeds; no real inventory counts are modeled yet, deliberately (see the feature's `research.md`). Reservation state lives in its own table, `order_fulfillment_sagas`, tracked separately from `orders` so releasing it twice — or releasing nothing — is a safe no-op rather than an error.
 2. **Charge** — unchanged from the flow above: charge, confirm or fail, retry up to 3 times via the same RabbitMQ delay queue.
@@ -187,7 +187,7 @@ Test data comes from [Bogus](https://github.com/bchavez/Bogus) (`new Faker().Com
 
 **End-to-end test** — `OrderSystem.EndToEndTests`, the slowest and heaviest tier by far (several minutes; needs Docker, Node, and a Chromium install), and deliberately kept to a single test rather than a large suite. It uses [`Aspire.Hosting.Testing`](https://learn.microsoft.com/dotnet/aspire/testing/write-your-first-test) (`DistributedApplicationTestingBuilder.CreateAsync<Program>()`) to boot the *real* `AppHost` — every container, both Api replicas, the NotificationService, and the frontend — then drives it with a real headless [Playwright](https://playwright.dev/dotnet/) Chromium browser: fill in the create-order form, submit, and watch the status page reach `Confirmed` live via the real SignalR connection, no mocking or stubbing anywhere in the stack. Unlike the other tiers, this is the only one that goes through the frontend and the real Aspire-managed network topology, which is exactly why it's the tier that caught composition bugs nothing else could: a missing `NEXT_PUBLIC_API_URL` (`.WithReference(api)` alone doesn't set the specific env var Next.js needs), a CORS origin hardcoded to a port Aspire doesn't guarantee the frontend actually gets, and the SignalR multi-replica affinity gap that led to pulling `OrderSystem.NotificationService` out (see **Multi-instance support**) — none of which a unit or adapter-integration test could ever see, since they don't touch the frontend or Aspire's real proxy/networking.
 
-Needs the Playwright Chromium browser installed once (`dotnet build OrderSystem.EndToEndTests && pwsh OrderSystem.EndToEndTests/bin/Debug/net10.0/playwright.ps1 install chromium`, or the non-PowerShell equivalent via `Microsoft.Playwright.Program.Main(["install", "chromium"])`). On Linux without `--with-deps` (e.g. no passwordless `sudo`), headless Chromium may need system libraries like `libasound2` sourced manually if they're missing.
+Needs the Playwright Chromium browser installed once (`dotnet build tests/OrderSystem.EndToEndTests && pwsh tests/OrderSystem.EndToEndTests/bin/Debug/net10.0/playwright.ps1 install chromium`, or the non-PowerShell equivalent via `Microsoft.Playwright.Program.Main(["install", "chromium"])`). On Linux without `--with-deps` (e.g. no passwordless `sudo`), headless Chromium may need system libraries like `libasound2` sourced manually if they're missing.
 
 ## Spec-Driven Development
 
@@ -223,19 +223,23 @@ written, not to add ceremony everywhere.
 
 ```
 OrderSystem.slnx
-OrderSystem.Domain/              # entities, value objects, domain events, ports
-OrderSystem.Domain.Tests/        # unit tests for the Order state machine
-OrderSystem.Application/         # CQRS commands, queries, Wolverine handlers
-OrderSystem.Application.Tests/   # handler unit tests, using hand-rolled fakes for every port
-OrderSystem.Adapters.Postgres/   # IOrderRepository via EF Core + Npgsql
-OrderSystem.Adapters.Kafka/      # IEventPublisher via Confluent.Kafka
-OrderSystem.Adapters.RabbitMQ/   # failed-payment retry publisher/consumer
-OrderSystem.Adapters.IntegrationTests/  # Testcontainers-backed tests for all three adapters
-OrderSystem.Api/                 # minimal API, DI composition root
-OrderSystem.NotificationService/ # SignalR hub + Kafka consumer, real-time push (own resource)
-OrderSystem.MigrationService/    # applies EF Core migrations against Postgres, then exits
-OrderSystem.AppHost/             # Aspire orchestration (Postgres, Kafka, RabbitMQ, migrator, Api, NotificationService, frontend)
-OrderSystem.EndToEndTests/       # Aspire.Hosting.Testing + Playwright, one full-stack browser-driven test
+src/
+├── Domain/OrderSystem.Domain/              # entities, value objects, domain events, ports
+├── Application/OrderSystem.Application/    # CQRS commands, queries, Wolverine handlers
+└── Adapters/
+    ├── OrderSystem.Adapters.Postgres/      # IOrderRepository via EF Core + Npgsql
+    ├── OrderSystem.Adapters.Kafka/         # IEventPublisher via Confluent.Kafka
+    └── OrderSystem.Adapters.RabbitMQ/      # failed-payment retry publisher/consumer
+hosts/
+├── OrderSystem.Api/                 # minimal API, DI composition root
+├── OrderSystem.NotificationService/ # SignalR hub + Kafka consumer, real-time push (own resource)
+├── OrderSystem.MigrationService/    # applies EF Core migrations against Postgres, then exits
+└── OrderSystem.AppHost/             # Aspire orchestration (Postgres, Kafka, RabbitMQ, migrator, Api, NotificationService, frontend)
+tests/
+├── OrderSystem.Domain.Tests/              # unit tests for the Order state machine
+├── OrderSystem.Application.Tests/         # handler unit tests, using hand-rolled fakes for every port
+├── OrderSystem.Adapters.IntegrationTests/ # Testcontainers-backed tests for all three adapters
+└── OrderSystem.EndToEndTests/             # Aspire.Hosting.Testing + Playwright, one full-stack browser-driven test
 order-system-frontend/           # Next.js app (create order form, live status page)
 .specify/                        # Spec-Driven Development: constitution, templates, scripts (see above)
 specs/                           # one directory per feature spec/plan/tasks, created by /speckit-specify

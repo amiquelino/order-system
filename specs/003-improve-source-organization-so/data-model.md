@@ -60,6 +60,19 @@ computed from the move table above, not re-derived per file.
 
 (`″` repeats the row above's "Referencing project".)
 
+## `hosts/OrderSystem.AppHost/AppHost.cs` — one more reference, found during implementation
+
+Not caught during planning: `AddJavaScriptApp("frontend", "../order-system-frontend")`
+is a string-literal relative path, not a `<ProjectReference>`, so the
+audit above — which only covered `.csproj`/`.slnx`/`.yml`/`.md` — missed
+it. `OrderSystem.AppHost` moved one level deeper (`OrderSystem.AppHost/` →
+`hosts/OrderSystem.AppHost/`), so this needs an extra `../`:
+`"../order-system-frontend"` → `"../../order-system-frontend"`. Caught by
+`tests/OrderSystem.EndToEndTests` timing out waiting for the frontend
+resource to start (T008) — exactly the kind of regression that gate
+exists to catch. A repo-wide grep for `"\.\./` across all `.cs` files
+confirmed this was the only hardcoded relative path of its kind.
+
 ## `OrderSystem.slnx` — every `<Project Path>` updated
 
 Each of the 13 `<Project Path="...">` values becomes its New path from

@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OrderSystem.Application\OrderSystem.Application.csproj" />
+    <ProjectReference Include="..\..\src\Application\OrderSystem.Application\OrderSystem.Application.csproj" />
   </ItemGroup>
 
 </Project>
