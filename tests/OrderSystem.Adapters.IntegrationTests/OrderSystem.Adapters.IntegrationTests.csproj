@@ -27,11 +27,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OrderSystem.Domain\OrderSystem.Domain.csproj" />
-    <ProjectReference Include="..\OrderSystem.Application\OrderSystem.Application.csproj" />
-    <ProjectReference Include="..\OrderSystem.Adapters.Postgres\OrderSystem.Adapters.Postgres.csproj" />
-    <ProjectReference Include="..\OrderSystem.Adapters.Kafka\OrderSystem.Adapters.Kafka.csproj" />
-    <ProjectReference Include="..\OrderSystem.Adapters.RabbitMQ\OrderSystem.Adapters.RabbitMQ.csproj" />
+    <ProjectReference Include="..\..\src\Domain\OrderSystem.Domain\OrderSystem.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Application\OrderSystem.Application\OrderSystem.Application.csproj" />
+    <ProjectReference Include="..\..\src\Adapters\OrderSystem.Adapters.Postgres\OrderSystem.Adapters.Postgres.csproj" />
+    <ProjectReference Include="..\..\src\Adapters\OrderSystem.Adapters.Kafka\OrderSystem.Adapters.Kafka.csproj" />
+    <ProjectReference Include="..\..\src\Adapters\OrderSystem.Adapters.RabbitMQ\OrderSystem.Adapters.RabbitMQ.csproj" />
   </ItemGroup>
 
 </Project>

@@ -16,9 +16,9 @@ jobs:
         with:
           dotnet-version: "10.0.x"
 
-      - run: dotnet test OrderSystem.Domain.Tests
+      - run: dotnet test tests/OrderSystem.Domain.Tests
 
-      - run: dotnet test OrderSystem.Application.Tests
+      - run: dotnet test tests/OrderSystem.Application.Tests
 
   adapter-integration-tests:
     name: Adapter integration tests
@@ -32,7 +32,7 @@ jobs:
 
       # Docker already ships running on ubuntu-latest, so Testcontainers
       # needs nothing extra here (research.md Decision 3).
-      - run: dotnet test OrderSystem.Adapters.IntegrationTests
+      - run: dotnet test tests/OrderSystem.Adapters.IntegrationTests
 
   end-to-end-tests:
     name: End-to-end tests
@@ -57,15 +57,15 @@ jobs:
         working-directory: order-system-frontend
 
       - name: Build the end-to-end test project
-        run: dotnet build OrderSystem.EndToEndTests
+        run: dotnet build tests/OrderSystem.EndToEndTests
 
       # --with-deps needs real root, which this hosted runner has (unlike
       # the local dev environment's workaround — research.md Decision 4).
       - name: Install Playwright Chromium
         run: pwsh bin/Debug/net10.0/playwright.ps1 install --with-deps chromium
-        working-directory: OrderSystem.EndToEndTests
+        working-directory: tests/OrderSystem.EndToEndTests
 
-      - run: dotnet test OrderSystem.EndToEndTests
+      - run: dotnet test tests/OrderSystem.EndToEndTests
 
   frontend-checks:
     name: Frontend checks

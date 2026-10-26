@@ -4,6 +4,8 @@
     <ProjectReference Include="..\OrderSystem.Api\OrderSystem.Api.csproj" />
     <ProjectReference Include="..\OrderSystem.MigrationService\OrderSystem.MigrationService.csproj" />
     <ProjectReference Include="..\OrderSystem.NotificationService\OrderSystem.NotificationService.csproj" />
+    <!-- Unchanged relative paths: Api/MigrationService/NotificationService all moved into
+         hosts/ alongside AppHost, so the sibling relationship (..\) is preserved. -->
   </ItemGroup>
 
   <ItemGroup>

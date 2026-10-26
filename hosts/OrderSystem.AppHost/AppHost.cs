@@ -43,7 +43,7 @@ var notifications = builder.AddProject<Projects.OrderSystem_NotificationService>
     .WaitFor(kafka)
     .WaitFor(cache);
 
-var frontend = builder.AddJavaScriptApp("frontend", "../order-system-frontend")
+var frontend = builder.AddJavaScriptApp("frontend", "../../order-system-frontend")
     .WithReference(api)
     .WithReference(notifications)
     .WaitFor(api)

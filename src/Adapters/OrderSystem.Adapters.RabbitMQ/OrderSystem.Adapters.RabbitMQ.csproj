@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\OrderSystem.Domain\OrderSystem.Domain.csproj" />
-    <ProjectReference Include="..\OrderSystem.Application\OrderSystem.Application.csproj" />
+    <ProjectReference Include="..\..\Domain\OrderSystem.Domain\OrderSystem.Domain.csproj" />
+    <ProjectReference Include="..\..\Application\OrderSystem.Application\OrderSystem.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -16,6 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OrderSystem.Adapters.Postgres\OrderSystem.Adapters.Postgres.csproj" />
+    <ProjectReference Include="..\..\src\Adapters\OrderSystem.Adapters.Postgres\OrderSystem.Adapters.Postgres.csproj" />
   </ItemGroup>
 </Project>
