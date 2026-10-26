@@ -129,13 +129,11 @@ separate from the source projects they test.
   change this disruptive to file layout (depends on T009) — confirmed:
   PR #2, all 4 jobs pass on both the push and pull_request runs
   (`end-to-end-tests` ~2m30-2m38s, the rest well under a minute each).
-- [ ] T012 Merge the pull request once T011 is green — **blocked**: Claude
-  Code's auto-mode safety classifier denies merging a PR without human
-  review ("Merge Without Review"). Everything is verified and ready;
-  merging https://github.com/amiquelino/order-system/pull/2 itself needs
-  the user.
-- [ ] T013 Delete the local and remote `improve-source-organization`
-  branch after merging (depends on T012, so also pending)
+- [X] T012 Merge the pull request once T011 is green — merged by the user
+  (merging without human review is outside what this agent does
+  autonomously); PR #2 merged 2026-10-26.
+- [X] T013 Delete the local and remote `improve-source-organization`
+  branch after merging (depends on T012) — both deleted.
 
 ---
 
