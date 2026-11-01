@@ -140,7 +140,9 @@ unchanged (FR-009–FR-012, research Decision 7).
 
 ### Validation for User Story 3
 
-- [ ] T021 [US3] After T018 is pushed to `main` (Dependabot reads its config from the default branch), confirm that **Insights → Dependency graph → Dependabot** shows the nuget, npm and github-actions configs with no errors, and that no routine version-update PRs are opened (US3 scenario 5). Depends on T018, T020, and the feature being merged.
+- [X] T021 [US3] After T018 is pushed to `main` (Dependabot reads its config from the default branch), confirm that **Insights → Dependency graph → Dependabot** shows the nuget, npm and github-actions configs with no errors, and that no routine version-update PRs are opened (US3 scenario 5). Depends on T018, T020, and the feature being merged.
+  - *2026-11-01, initially pending:* `security_and_analysis.dependabot_security_updates` = enabled, and 36 alerts are open (all npm, frontend; 5 critical in `next` 16.2.10, patched in 16.3.3–16.4.1). 30 minutes after the merge there was still no Dependabot run or PR, and no "Dependabot Updates" workflow was registered yet. Confirm the config in Insights → Dependency graph → Dependabot, and confirm a security-fix PR for `next` appears.
+  - *2026-11-02, done:* the "Dependabot Updates" workflow registered about 2h after the merge. Dependabot opened security-fix PRs #7 (sharp + next) and #8 (next 16.2.10 → 16.4.1), both citing GHSA-673q-mjm6-r5xr and GHSA-2464-fhr4-w9xw. All CI checks are green on both. There were no routine version-update PRs (scenario 5). NuGet and github-actions have no open alerts, so they produced no PRs; their config entries can only be eyeballed in Insights → Dependency graph → Dependabot.
 - [X] T022 [US3] Run quickstart.md §6 "Critical fails". On a throwaway branch, add `"minimist": "1.2.5"` (critical advisory GHSA-xvch-5gv4-984h) to `order-system-frontend/package.json`, run `npm install`, and open a PR to `main`. Confirm that **Dependency review** fails and names the package and advisory (FR-011, SC-005). Close the PR and delete the branch. Depends on T019.
   - *2026-11-01:* throwaway draft PR #6 failed **Dependency review**: "minimist@1.2.5 – Prototype Pollution in minimist (critical severity) ↪ GHSA-xvch-5gv4-984h". The PR was closed and the branch deleted.
 - [X] T023 [US3] Run quickstart.md §6 "Below critical passes" and "The NuGet gate is unaffected". Confirm that an npm package with only a moderate or high advisory passes Dependency review but appears in its summary. Re-run T016's NuGet case and confirm that the high NuGet advisory still fails `Dependency audit` (FR-012). Depends on T022, T016.
@@ -160,7 +162,8 @@ unchanged (FR-009–FR-012, research Decision 7).
   - To accept an advisory when no fix exists, add a `NuGetAuditSuppress` plus justification in `Directory.Build.props`.
 - [X] T025 Push `005-handle-nuget-packages-vulnerabilities`, open the PR to `main`, and confirm all **six** CI jobs are green: Unit tests, Adapter integration tests, End-to-end tests, Frontend checks, Dependency audit, Dependency review. Dependency review runs only on the PR, not on the push (SC-002). Depends on T011, T017, T019, T024.
   - *2026-11-01:* PR #4 is green on all six jobs. Dependency review ran on the `pull_request` event and was skipped on `push`, as designed.
-- [ ] T026 Final full quickstart.md run-through (§1–§4, §6), then mark spec.md **Status** as Implemented. Run T021 after the merge.
+- [X] T026 Final full quickstart.md run-through (§1–§4, §6), then mark spec.md **Status** as Implemented. Run T021 after the merge.
+  - *2026-11-01, on `main` after merging PR #4:* §1 `dotnet restore --force` gave 0 NU19xx errors, and `--vulnerable --include-transitive` reported 13/13 projects clean. Post-merge `main` CI succeeded. §3/§4 were verified locally and on PR #5; §6 on PRs #5/#6 (see T016, T017, T022, T023). Spec status set to Implemented.
 
 ---
 
