@@ -74,10 +74,14 @@ Upgrade the parent packages, not transitive pins (research Decision 1):
 - [X] T006 [US1] Run quickstart.md §1. `dotnet restore OrderSystem.slnx --force` should produce no NU1901–NU1904 output, `dotnet list … --vulnerable --include-transitive` should report no vulnerable packages for all 13 projects, and the `dotnet nuget why` checks should show SSH.NET 2026.0.0 and MessagePack ≥ 2.5.303 everywhere. Depends on T002–T005.
 - [X] T007 [P] [US1] Domain + Application tier: `dotnet test tests/OrderSystem.Domain.Tests` and `dotnet test tests/OrderSystem.Application.Tests` pass. This is a sanity check, since neither project's packages changed. Depends on T006.
   - *2026-11-01:* Domain 21/21 and Application 36/36 passed. The full solution also builds with 0 errors; Aspire 13.6 adds one informational ASPIRE010 warning, because the SDK now defaults `AspireUseCliBundle=false`.
-- [ ] T008 [P] [US1] Adapter integration tier (Docker running): `dotnet test tests/OrderSystem.Adapters.IntegrationTests` passes on Testcontainers 4.14.0. Depends on T006.
-- [ ] T009 [P] [US1] End-to-end tier: `dotnet build tests/OrderSystem.EndToEndTests`, install Playwright Chromium if needed, then `dotnet test tests/OrderSystem.EndToEndTests` passes on Aspire 13.6.4 and SignalR.StackExchangeRedis 10.0.14. This is the regression guard for Principle V's live status updates. Depends on T006.
-- [ ] T010 [US1] **Conditional, only if T008 or T009 fails because of a bump** that isn't a trivial API fix: apply research Decision 6's fallback to *that finding only*. Revert its parent bump, and add a direct `MessagePack` (≥ 2.5.303) or `SSH.NET` (2026.0.0) `PackageReference` to the affected `.csproj`. Put an XML comment above it linking the GHSA and stating "remove once <parent> ≥ <version>". Re-run T006 and the failed tier. Record the outcome in research.md Decision 6 (FR-008). If T008 and T009 both passed, mark this task done with "not needed".
+- [X] T008 [P] [US1] Adapter integration tier (Docker running): `dotnet test tests/OrderSystem.Adapters.IntegrationTests` passes on Testcontainers 4.14.0. Depends on T006.
+  - *2026-11-01, CI on PR #4:* Adapter integration tests passed on Testcontainers 4.14.0 (not run locally, since Docker was unavailable).
+- [X] T009 [P] [US1] End-to-end tier: `dotnet build tests/OrderSystem.EndToEndTests`, install Playwright Chromium if needed, then `dotnet test tests/OrderSystem.EndToEndTests` passes on Aspire 13.6.4 and SignalR.StackExchangeRedis 10.0.14. This is the regression guard for Principle V's live status updates. Depends on T006.
+  - *2026-11-01, CI on PR #4:* End-to-end tests passed on Aspire 13.6.4 and SignalR.StackExchangeRedis 10.0.14 (~3m15s).
+- [X] T010 [US1] **Conditional, only if T008 or T009 fails because of a bump** that isn't a trivial API fix: apply research Decision 6's fallback to *that finding only*. Revert its parent bump, and add a direct `MessagePack` (≥ 2.5.303) or `SSH.NET` (2026.0.0) `PackageReference` to the affected `.csproj`. Put an XML comment above it linking the GHSA and stating "remove once <parent> ≥ <version>". Re-run T006 and the failed tier. Record the outcome in research.md Decision 6 (FR-008). If T008 and T009 both passed, mark this task done with "not needed".
+  - *Not needed:* T008 and T009 both passed, so no fallback pins were added.
 - [ ] T011 [US1] Manual golden path (spec US1 scenario 3, quickstart.md §2): `dotnet run --project hosts/OrderSystem.AppHost`, place an order in the frontend, and watch its status update live through NotificationService.
+  - *Open:* not run manually (no Docker locally). The automated End-to-end test (T009) drives the same golden path (create order → live `Confirmed` status over SignalR) and passed in CI.
 
 **Checkpoint**: The audit is clean and all tiers are green. US1 is shippable on its own as the MVP.
 
@@ -102,10 +106,12 @@ fails the build) and §4 (one suppression silences only its advisory).
 ### Validation for User Story 2
 
 - [X] T015 [US2] With the gate on, confirm a clean graph passes (SC-004). `dotnet restore OrderSystem.slnx --force` and `dotnet build OrderSystem.slnx` should both succeed with no new errors. This also confirms that `WarningsAsErrors` didn't promote any unrelated existing warnings. Depends on T012–T013.
-- [ ] T016 [US2] Run quickstart.md §3 on a throwaway branch. Add `Newtonsoft.Json` 12.0.1 to `tests/OrderSystem.Domain.Tests/OrderSystem.Domain.Tests.csproj`; `dotnet restore` should **fail** with `error NU1903` naming the project, package, version and advisory URL (FR-005, FR-006). Push the branch and confirm the `Dependency audit` CI job fails (FR-004, SC-003). Depends on T014, T015.
+- [X] T016 [US2] Run quickstart.md §3 on a throwaway branch. Add `Newtonsoft.Json` 12.0.1 to `tests/OrderSystem.Domain.Tests/OrderSystem.Domain.Tests.csproj`; `dotnet restore` should **fail** with `error NU1903` naming the project, package, version and advisory URL (FR-005, FR-006). Push the branch and confirm the `Dependency audit` CI job fails (FR-004, SC-003). Depends on T014, T015.
   - *2026-11-01, local part verified:* restore failed with `error NU1903: Warning As Error: Package 'Newtonsoft.Json' 12.0.1 … GHSA-5crp-9r3c-p9vr`. The temporary change was reverted. The CI part still needs a pushed throwaway branch.
-- [ ] T017 [US2] Run quickstart.md §4 on the same throwaway branch. Add a `NuGetAuditSuppress` for that one advisory and confirm restore passes. Add a second, different vulnerable package and confirm restore fails again for it only (FR-007). Delete the throwaway branch locally and on the remote. Depends on T016.
+  - *2026-11-01, CI part:* throwaway draft PR #5 failed **Dependency audit** with `error NU1903 … Newtonsoft.Json 12.0.1 … GHSA-5crp-9r3c-p9vr`. (Unit tests also failed, as expected, because they restore the same project.) The PR was closed and the branch deleted.
+- [X] T017 [US2] Run quickstart.md §4 on the same throwaway branch. Add a `NuGetAuditSuppress` for that one advisory and confirm restore passes. Add a second, different vulnerable package and confirm restore fails again for it only (FR-007). Delete the throwaway branch locally and on the remote. Depends on T016.
   - *2026-11-01, verified locally:* with GHSA-5crp-9r3c-p9vr suppressed, restore passed. Adding `System.Text.Json` 8.0.4 then failed restore with `NU1903 … GHSA-8g4q-xg66-9fp4` only. Temporary edits were reverted. The remaining step is cleaning up the throwaway branch, which depends on T016's CI part.
+  - *Cleanup done:* throwaway branches deleted locally and on the remote.
 
 **Checkpoint**: The gate is live locally and in CI, it's proven to fail on a vulnerable package and pass on a clean graph, and suppression is proven to be scoped.
 
@@ -129,13 +135,16 @@ unchanged (FR-009–FR-012, research Decision 7).
 
   Add a header comment explaining why the limit is 0, and pointing to research Decision 7.
 - [X] T019 [US3] In `.github/workflows/ci.yml`, add a job `dependency-review` (name: `Dependency review`) on `ubuntu-latest` with `if: github.event_name == 'pull_request'`. Steps: `actions/checkout@v4`, then `actions/dependency-review-action@v4` with `fail-on-severity: critical` (FR-011). Don't set `needs:`. Add a comment noting that it sees only direct NuGet references, so the transitive NuGet gate is the `dependency-audit` job (FR-012). Same file as T014, so run it after T014.
-- [ ] T020 [US3] **Repo-admin action, needs the maintainer's go-ahead because it changes GitHub repository settings.** Enable vulnerability alerts and automated security fixes: `gh api -X PUT repos/amiquelino/order-system/vulnerability-alerts` then `gh api -X PUT repos/amiquelino/order-system/automated-security-fixes`. Confirm with the two `gh api` GET checks in quickstart.md §6 (FR-009, FR-010). This is independent of every file task, so it can be done any time.
+- [X] T020 [US3] **Repo-admin action, needs the maintainer's go-ahead because it changes GitHub repository settings.** Enable vulnerability alerts and automated security fixes: `gh api -X PUT repos/amiquelino/order-system/vulnerability-alerts` then `gh api -X PUT repos/amiquelino/order-system/automated-security-fixes`. Confirm with the two `gh api` GET checks in quickstart.md §6 (FR-009, FR-010). This is independent of every file task, so it can be done any time.
+  - *2026-11-01:* both `PUT`s returned 204; `vulnerability-alerts` GET → 204, `automated-security-fixes` → `{"enabled":true,"paused":false}`.
 
 ### Validation for User Story 3
 
 - [ ] T021 [US3] After T018 is pushed to `main` (Dependabot reads its config from the default branch), confirm that **Insights → Dependency graph → Dependabot** shows the nuget, npm and github-actions configs with no errors, and that no routine version-update PRs are opened (US3 scenario 5). Depends on T018, T020, and the feature being merged.
-- [ ] T022 [US3] Run quickstart.md §6 "Critical fails". On a throwaway branch, add `"minimist": "1.2.5"` (critical advisory GHSA-xvch-5gv4-984h) to `order-system-frontend/package.json`, run `npm install`, and open a PR to `main`. Confirm that **Dependency review** fails and names the package and advisory (FR-011, SC-005). Close the PR and delete the branch. Depends on T019.
-- [ ] T023 [US3] Run quickstart.md §6 "Below critical passes" and "The NuGet gate is unaffected". Confirm that an npm package with only a moderate or high advisory passes Dependency review but appears in its summary. Re-run T016's NuGet case and confirm that the high NuGet advisory still fails `Dependency audit` (FR-012). Depends on T022, T016.
+- [X] T022 [US3] Run quickstart.md §6 "Critical fails". On a throwaway branch, add `"minimist": "1.2.5"` (critical advisory GHSA-xvch-5gv4-984h) to `order-system-frontend/package.json`, run `npm install`, and open a PR to `main`. Confirm that **Dependency review** fails and names the package and advisory (FR-011, SC-005). Close the PR and delete the branch. Depends on T019.
+  - *2026-11-01:* throwaway draft PR #6 failed **Dependency review**: "minimist@1.2.5 – Prototype Pollution in minimist (critical severity) ↪ GHSA-xvch-5gv4-984h". The PR was closed and the branch deleted.
+- [X] T023 [US3] Run quickstart.md §6 "Below critical passes" and "The NuGet gate is unaffected". Confirm that an npm package with only a moderate or high advisory passes Dependency review but appears in its summary. Re-run T016's NuGet case and confirm that the high NuGet advisory still fails `Dependency audit` (FR-012). Depends on T022, T016.
+  - *2026-11-01, PR #5:* **Dependency review** passed ("did not detect any vulnerable packages with severity level critical or higher") with lodash 4.17.20 (high) and Newtonsoft.Json 12.0.1 (high) added, while **Dependency audit** failed on the same Newtonsoft.Json. Both thresholds are confirmed independent (FR-012).
 
 **Checkpoint**: Alerts and security-fix PRs are on for three ecosystems, critical advisories block PRs, and the NuGet gate is still strict.
 
@@ -149,7 +158,8 @@ unchanged (FR-009–FR-012, research Decision 7).
   - Dependabot alerts and security-fix PRs are on; routine version PRs are not.
   - To fix a NuGet advisory, upgrade the parent package first. Use a direct pin only as a fallback, with a removal comment.
   - To accept an advisory when no fix exists, add a `NuGetAuditSuppress` plus justification in `Directory.Build.props`.
-- [ ] T025 Push `005-handle-nuget-packages-vulnerabilities`, open the PR to `main`, and confirm all **six** CI jobs are green: Unit tests, Adapter integration tests, End-to-end tests, Frontend checks, Dependency audit, Dependency review. Dependency review runs only on the PR, not on the push (SC-002). Depends on T011, T017, T019, T024.
+- [X] T025 Push `005-handle-nuget-packages-vulnerabilities`, open the PR to `main`, and confirm all **six** CI jobs are green: Unit tests, Adapter integration tests, End-to-end tests, Frontend checks, Dependency audit, Dependency review. Dependency review runs only on the PR, not on the push (SC-002). Depends on T011, T017, T019, T024.
+  - *2026-11-01:* PR #4 is green on all six jobs. Dependency review ran on the `pull_request` event and was skipped on `push`, as designed.
 - [ ] T026 Final full quickstart.md run-through (§1–§4, §6), then mark spec.md **Status** as Implemented. Run T021 after the merge.
 
 ---
