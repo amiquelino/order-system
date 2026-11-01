@@ -1,0 +1,32 @@
+# Dependabot: SECURITY updates only
+# (specs/005-handle-nuget-packages-vulnerabilities, research.md Decision 7).
+#
+# open-pull-requests-limit: 0 turns off routine version-update PRs.
+# Security-update PRs (raised from Dependabot alerts) aren't subject to this
+# limit, so Dependabot still opens a fix PR whenever an alert has a patched
+# version. This file tells Dependabot where each ecosystem's manifests live.
+#
+# Requires "Dependabot alerts" and "Dependabot security updates" to be
+# enabled in the repository's security settings.
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directories:
+      - "/src/**"
+      - "/hosts/**"
+      - "/tests/**"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+
+  - package-ecosystem: npm
+    directory: "/order-system-frontend"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 0

@@ -67,6 +67,37 @@ jobs:
 
       - run: dotnet test tests/OrderSystem.EndToEndTests
 
+  # Restores the whole solution so every project, including ones no test job
+  # restores, passes the NuGet vulnerability gate in Directory.Build.props.
+  # Fails on any known advisory, direct or transitive, of any severity
+  # (specs/005-handle-nuget-packages-vulnerabilities, research.md Decision 4).
+  dependency-audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+
+      - run: dotnet restore OrderSystem.slnx
+
+  # Fails a PR that introduces a CRITICAL advisory in any ecosystem
+  # (NuGet, npm, GitHub Actions). GitHub's dependency graph only sees direct
+  # NuGet references, so the transitive NuGet check is `dependency-audit`
+  # above, which stays strict at every severity (research.md Decision 7).
+  dependency-review:
+    name: Dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: critical
+
   frontend-checks:
     name: Frontend checks
     runs-on: ubuntu-latest
