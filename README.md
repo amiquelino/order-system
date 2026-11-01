@@ -191,6 +191,20 @@ Test data comes from [Bogus](https://github.com/bchavez/Bogus) (`new Faker().Com
 
 Needs the Playwright Chromium browser installed once (`dotnet build tests/OrderSystem.EndToEndTests && pwsh tests/OrderSystem.EndToEndTests/bin/Debug/net10.0/playwright.ps1 install chromium`, or the non-PowerShell equivalent via `Microsoft.Playwright.Program.Main(["install", "chromium"])`). On Linux without `--with-deps` (e.g. no passwordless `sudo`), headless Chromium may need system libraries like `libasound2` sourced manually if they're missing.
 
+## Dependency vulnerabilities
+
+Three layers, set up in [`specs/005-handle-nuget-packages-vulnerabilities`](specs/005-handle-nuget-packages-vulnerabilities/):
+
+- **NuGet restore gate** (`Directory.Build.props`). Every `dotnet restore`, local or CI, audits every NuGet package the solution resolves, *including transitive ones*. Any known advisory, of any severity, fails the restore with `error NU190x`, which names the project, package, version and advisory URL. The `Dependency audit` CI job restores the whole solution so no project escapes the check.
+- **PR check across ecosystems** (`Dependency review` CI job, PRs only). It fails a PR that introduces a **critical** advisory in NuGet, npm (`order-system-frontend`) or GitHub Actions. GitHub's dependency graph only sees *direct* NuGet references, which is why the stricter restore gate above stays in place.
+- **Dependabot** (`.github/dependabot.yml`). Alerts and security-fix PRs are on for all three ecosystems. Routine version-bump PRs are deliberately off (`open-pull-requests-limit: 0`).
+
+**When restore fails on an advisory**:
+
+1. Upgrade the *parent* package that pulls the vulnerable one in (`dotnet nuget why <project> <package>` shows the path). Prefer the smallest version that depends on the patched release.
+2. Only if that breaks something, pin the patched version directly, with a comment linking the advisory and saying when the pin can be removed.
+3. Only if **no** patched version exists, accept that single advisory with a `NuGetAuditSuppress` item and a justification comment in `Directory.Build.props`. The file shows the format. Never `NoWarn` NU1901–NU1904, because that silences a whole severity rather than one advisory.
+
 ## Spec-Driven Development
 
 Non-trivial changes (new features, cross-layer decisions) go through a
