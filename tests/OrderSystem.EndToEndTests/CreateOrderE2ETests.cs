@@ -84,10 +84,19 @@ public class CreateOrderE2ETests : IClassFixture<AppHostFixture>, IAsyncLifetime
         // status page — the cause of an observed CI flake. React tags every
         // hydrated host element with a "__reactProps$<id>" key; wait for it on the
         // form instead of guessing with a delay.
-        await page.WaitForFunctionAsync(
-            "() => { const form = document.querySelector('form'); return !!form && Object.keys(form).some(k => k.startsWith('__reactProps')); }",
-            null,
-            new PageWaitForFunctionOptions { Timeout = 60_000 });
+        try
+        {
+            await page.WaitForFunctionAsync(
+                "() => { const form = document.querySelector('form'); return !!form && Object.keys(form).some(k => k.startsWith('__reactProps')); }",
+                null,
+                new PageWaitForFunctionOptions { Timeout = 60_000 });
+        }
+        catch (TimeoutException ex)
+        {
+            throw new TimeoutException(
+                $"The create-order form on '{page.Url}' never became interactive (React never hydrated it) within 60s.",
+                ex);
+        }
 
         // $500 total: SimulatedPaymentGateway declines the first attempt and only
         // approves on retry, so the page really does have to live-update via
