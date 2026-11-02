@@ -10,9 +10,9 @@ jobs:
     name: Unit tests (Domain + Application)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "10.0.x"
 
@@ -24,9 +24,9 @@ jobs:
     name: Adapter integration tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "10.0.x"
 
@@ -38,22 +38,25 @@ jobs:
     name: End-to-end tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "10.0.x"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "24"
           cache: npm
           cache-dependency-path: order-system-frontend/package-lock.json
 
       # Required before Aspire can start the frontend resource — see
-      # README.md "Prerequisites".
+      # README.md "Prerequisites". `npm ci` installs exactly what the lockfile
+      # says (never rewrites it); --no-audit skips npm's per-install advisory
+      # lookup, which is slow and redundant here (Dependabot + the Dependency
+      # review job cover npm advisories).
       - name: Install frontend dependencies
-        run: npm install
+        run: npm ci --no-audit --no-fund
         working-directory: order-system-frontend
 
       - name: Build the end-to-end test project
@@ -67,6 +70,17 @@ jobs:
 
       - run: dotnet test tests/OrderSystem.EndToEndTests
 
+      # On failure, keep the Playwright trace (screenshots, DOM snapshots, network,
+      # console) so the run can be replayed at https://trace.playwright.dev.
+      - name: Upload Playwright trace
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-trace
+          path: tests/OrderSystem.EndToEndTests/bin/Debug/net10.0/playwright-traces/
+          retention-days: 7
+          if-no-files-found: ignore
+
   # Restores the whole solution so every project, including ones no test job
   # restores, passes the NuGet vulnerability gate in Directory.Build.props.
   # Fails on any known advisory, direct or transitive, of any severity
@@ -75,9 +89,9 @@ jobs:
     name: Dependency audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: "10.0.x"
 
@@ -92,9 +106,9 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/dependency-review-action@v4
+      - uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: critical
 
@@ -105,14 +119,14 @@ jobs:
       run:
         working-directory: order-system-frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "24"
           cache: npm
           cache-dependency-path: order-system-frontend/package-lock.json
 
-      - run: npm ci
+      - run: npm ci --no-audit --no-fund
       - run: npm run lint
       - run: npm run build

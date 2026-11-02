@@ -22,6 +22,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UserSecretsId>e164a1a6-270d-41e7-90a8-9e44e5476a43</UserSecretsId>
+    <!-- ASPIRE010: from Aspire 13.6 on, the SDK defaults AspireUseCliBundle=false and
+         warns about it. This project deliberately keeps the package-based dashboard/DCP
+         setup it has always used (runs via `dotnet run` and Aspire.Hosting.Testing,
+         no Aspire CLI), so the warning carries no action for us. -->
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);ASPIRE010</MSBuildWarningsAsMessages>
   </PropertyGroup>
 
   <ItemGroup>

@@ -191,6 +191,8 @@ Test data comes from [Bogus](https://github.com/bchavez/Bogus) (`new Faker().Com
 
 Needs the Playwright Chromium browser installed once (`dotnet build tests/OrderSystem.EndToEndTests && pwsh tests/OrderSystem.EndToEndTests/bin/Debug/net10.0/playwright.ps1 install chromium`, or the non-PowerShell equivalent via `Microsoft.Playwright.Program.Main(["install", "chromium"])`). On Linux without `--with-deps` (e.g. no passwordless `sudo`), headless Chromium may need system libraries like `libasound2` sourced manually if they're missing.
 
+Every run saves a Playwright trace to `tests/OrderSystem.EndToEndTests/bin/Debug/net10.0/playwright-traces/`. It covers screenshots, DOM snapshots, network traffic and browser console. When the job fails in CI, the trace is uploaded as the `playwright-trace` artifact; open it at [trace.playwright.dev](https://trace.playwright.dev) or with `pwsh tests/OrderSystem.EndToEndTests/bin/Debug/net10.0/playwright.ps1 show-trace <file>`. The browser console and any failed or error responses are printed under the failed test's "Standard Output Messages" in the job log.
+
 ## Dependency vulnerabilities
 
 Three layers, set up in [`specs/005-handle-nuget-packages-vulnerabilities`](specs/005-handle-nuget-packages-vulnerabilities/):
