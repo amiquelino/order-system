@@ -120,8 +120,10 @@ infrastructure.
 ## Phase 6: Polish & Cross-Cutting Concerns
 
 - [X] T018 Write the retroactive design docs: `specs/006-make-end-to-end/spec.md`, `plan.md`, `research.md`, `quickstart.md`, `tasks.md`.
-- [ ] T019 Confirm PR #10 is green on its **latest** commit, which adds the spec and the T010 hydration-timeout message, then merge it (the maintainer's action).
-- [ ] T020 After the merge, confirm `main` CI is green, and set spec.md **Status** to note that it's merged.
+- [X] T019 Confirm PR #10 is green on its **latest** commit, which adds the spec and the T010 hydration-timeout message, then merge it (the maintainer's action).
+  - *2026-11-02:* PR #10 was green on its latest commit (`5739d51`), and the maintainer merged it as `a6abaa3`.
+- [X] T020 After the merge, confirm `main` CI is green, and set spec.md **Status** to note that it's merged.
+  - *2026-11-02:* `main` CI on `a6abaa3` was green: Unit, Adapter integration, End-to-end, Frontend checks and Dependency audit all succeeded, and Dependency review was skipped on push as designed. Spec Status updated.
 
 ---
 

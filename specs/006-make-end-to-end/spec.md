@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-02
 
-**Status**: Implemented in PR #10. This spec was written after the
+**Status**: Implemented, merged in PR #10 (`a6abaa3`, 2026-11-02); post-merge `main` CI green. This spec was written after the
 implementation, to record the decisions behind it. US1 scenario 4 was verified
 on 2026-11-02 in run 41465842762, a deliberately failing throwaway commit with
 unit price `-5`, which the form's own validation blocks:
