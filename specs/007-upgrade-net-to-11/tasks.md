@@ -111,7 +111,7 @@ US2 P2, US3 P3).
   - `dotnet build OrderSystem.slnx` gives 0 warnings and 0 errors with the gate on.
   - The quickstart §4 grep finds no prerelease version.
   - `git diff main -- Directory.Build.props` adds no `NuGetAuditSuppress` or `NoWarn` (FR-005, FR-007, SC-003, SC-004)
-- [ ] T024 [US2] Re-run T014–T016 (all four tiers) after the package bumps. SignalR 11 and EF 10.0.15 sit under the E2E and adapter tiers respectively
+- [X] T024 [US2] Re-run T014–T016 (all four tiers) after the package bumps. SignalR 11 and EF 10.0.15 sit under the E2E and adapter tiers respectively — *CI run 44624696122 (@6126e72): Domain 21, Application 36, Integration 9, E2E 1, all net11.0, all green.*
 
 **Checkpoint**: The dependency set is final. CI is green.
 
