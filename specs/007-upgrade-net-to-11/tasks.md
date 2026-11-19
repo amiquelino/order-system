@@ -83,8 +83,8 @@ US2 P2, US3 P3).
 - [X] T012 [US1] Fix the net11.0-only NU1510 warnings (research Decision 4) by removing the `Microsoft.Extensions.DependencyInjection.Abstractions` PackageReference from `src/Adapters/OrderSystem.Adapters.Kafka/OrderSystem.Adapters.Kafka.csproj` and the `Microsoft.Extensions.Hosting.Abstractions` PackageReference from `src/Adapters/OrderSystem.Adapters.RabbitMQ/OrderSystem.Adapters.RabbitMQ.csproj`. Then `dotnet build OrderSystem.slnx` shows `0 Warning(s)`, `0 Error(s)` (quickstart §3)
 - [X] T013 [US1] In `.github/workflows/ci.yml`, replace `dotnet-version: "10.0.x"` with `global-json-file: global.json` in all 4 `actions/setup-dotnet@v6` steps (unit, integration, end-to-end, dependency-audit jobs). Change both hard-coded Playwright paths `bin/Debug/net10.0/` → `bin/Debug/net11.0/` (the `playwright.ps1 install` step and the `playwright-traces` artifact path). FR-009
 - [X] T014 [P] [US1] Validate the unit tiers: `dotnet test tests/OrderSystem.Domain.Tests` and `dotnet test tests/OrderSystem.Application.Tests` both report `(net11.0)`, 0 failed, 0 skipped, counts ≥ T002 baseline — *Local, .NET 11.0.100: Domain 21/21, Application 36/36 (net11.0).*
-- [ ] T015 [P] [US1] Validate the adapter tier (needs Docker): `dotnet test tests/OrderSystem.Adapters.IntegrationTests`, 0 failed, 0 skipped, count ≥ baseline. This is the first real-database run of EF Core 10 + Npgsql on the .NET 11 runtime (research "Risks")
-- [ ] T016 [US1] Validate the end-to-end tier (needs Docker): `dotnet test tests/OrderSystem.EndToEndTests`, 0 failed, 0 skipped, count ≥ baseline. This is the first run of Aspire 13.6.5 orchestrating net11.0 hosts and of Wolverine runtime codegen at host startup (research "Risks")
+- [X] T015 [P] [US1] Validate the adapter tier (needs Docker): `dotnet test tests/OrderSystem.Adapters.IntegrationTests`, 0 failed, 0 skipped, count ≥ baseline. This is the first real-database run of EF Core 10 + Npgsql on the .NET 11 runtime (research "Risks") — *CI run 44623611462 (@7803adb): 9/9 (net11.0).*
+- [X] T016 [US1] Validate the end-to-end tier (needs Docker): `dotnet test tests/OrderSystem.EndToEndTests`, 0 failed, 0 skipped, count ≥ baseline. This is the first run of Aspire 13.6.5 orchestrating net11.0 hosts and of Wolverine runtime codegen at host startup (research "Risks") — *CI run 44623611462 (@7803adb): 1/1 (net11.0).*
 - [ ] T017 [US1] Golden path by hand (quickstart §7): `dotnet run --project hosts/OrderSystem.AppHost`, place an order in the frontend, and confirm the final status, a live status update without a refresh, and the notification
 
 **Checkpoint**: The solution is on .NET 11, and every tier passes locally. Push the branch and confirm all CI jobs are green on the .NET 11 SDK.
@@ -99,15 +99,15 @@ US2 P2, US3 P3).
 
 ### Implementation for User Story 2
 
-- [ ] T018 [P] [US2] Bump `Microsoft.AspNetCore.SignalR.StackExchangeRedis` → `11.0.0` in `hosts/OrderSystem.NotificationService/OrderSystem.NotificationService.csproj` (FR-003)
-- [ ] T019 [US2] In `hosts/OrderSystem.MigrationService/OrderSystem.MigrationService.csproj`, bump `Microsoft.Extensions.Hosting` 10.0.10 → `11.0.0` (FR-003) and `Microsoft.EntityFrameworkCore.Design` 10.0.4 → `10.0.15` (research Decision 2)
-- [ ] T020 [US2] In `src/Adapters/OrderSystem.Adapters.Postgres/OrderSystem.Adapters.Postgres.csproj`:
-  - Bump `Microsoft.EntityFrameworkCore` and `Microsoft.EntityFrameworkCore.Design` 10.0.4 → `10.0.15`.
+- [X] T018 [P] [US2] Bump `Microsoft.AspNetCore.SignalR.StackExchangeRedis` → `11.0.0` in `hosts/OrderSystem.NotificationService/OrderSystem.NotificationService.csproj` (FR-003)
+- [X] T019 [US2] In `hosts/OrderSystem.MigrationService/OrderSystem.MigrationService.csproj`, bump `Microsoft.Extensions.Hosting` 10.0.10 → `11.0.0` (FR-003) and `Microsoft.EntityFrameworkCore.Design` 10.0.4 → `10.0.15` (research Decision 2)
+- [X] T020 [US2] In `src/Adapters/OrderSystem.Adapters.Postgres/OrderSystem.Adapters.Postgres.csproj`:
+  - Bump `Microsoft.EntityFrameworkCore` and `Microsoft.EntityFrameworkCore.Design` 10.0.4 → `10.0.15`. *Implementation note: also added a direct `Microsoft.EntityFrameworkCore.Relational` 10.0.15 reference. Without it, Api and IntegrationTests resolved Relational 10.0.4 via Npgsql and the build warned MSB3277 (research Decision 2 addendum).*
   - Leave `Npgsql.EntityFrameworkCore.PostgreSQL` at 10.0.3.
   - Above these references, add a comment recording the FR-006 exception: the reason (the provider has only 11.0.0-rc.3, and 10.0.3 requires EF Core `[10.0.4, 11.0.0)`), the exit condition (move EF Core, .Design, dotnet-ef and the provider to 11.x together once Npgsql.EntityFrameworkCore.PostgreSQL ships stable 11.0.0), and a link to `specs/007-upgrade-net-to-11/research.md` Decision 2
-- [ ] T021 [P] [US2] Bump the `dotnet-ef` local tool 10.0.10 → `10.0.15` in `.config/dotnet-tools.json` so it matches EF Core (research Decision 2). Then `dotnet tool restore`
-- [ ] T022 [US2] EF model hasn't drifted (quickstart §6): `dotnet ef migrations has-pending-model-changes --project src/Adapters/OrderSystem.Adapters.Postgres --startup-project hosts/OrderSystem.MigrationService` reports "No changes have been made to the model since the last migration."
-- [ ] T023 [US2] Audit and prerelease checks (quickstart §3–4):
+- [X] T021 [P] [US2] Bump the `dotnet-ef` local tool 10.0.10 → `10.0.15` in `.config/dotnet-tools.json` so it matches EF Core (research Decision 2). Then `dotnet tool restore`
+- [X] T022 [US2] EF model hasn't drifted (quickstart §6): `dotnet ef migrations has-pending-model-changes --project src/Adapters/OrderSystem.Adapters.Postgres --startup-project hosts/OrderSystem.MigrationService` reports "No changes have been made to the model since the last migration."
+- [X] T023 [US2] Audit and prerelease checks (quickstart §3–4):
   - `dotnet build OrderSystem.slnx` gives 0 warnings and 0 errors with the gate on.
   - The quickstart §4 grep finds no prerelease version.
   - `git diff main -- Directory.Build.props` adds no `NuGetAuditSuppress` or `NoWarn` (FR-005, FR-007, SC-003, SC-004)

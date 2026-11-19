@@ -29,8 +29,8 @@ recorded with a reason and an exit condition. There's exactly one, recorded in
 
 | Field | Value |
 |---|---|
-| Packages | Microsoft.EntityFrameworkCore, Microsoft.EntityFrameworkCore.Design, dotnet-ef (tool), Npgsql.EntityFrameworkCore.PostgreSQL |
-| Held at | EF Core / Design / dotnet-ef 10.0.15; Npgsql provider 10.0.3 |
+| Packages | Microsoft.EntityFrameworkCore, Microsoft.EntityFrameworkCore.Relational, Microsoft.EntityFrameworkCore.Design, dotnet-ef (tool), Npgsql.EntityFrameworkCore.PostgreSQL |
+| Held at | EF Core / Relational / Design / dotnet-ef 10.0.15; Npgsql provider 10.0.3 |
 | Reason | The provider has no stable 11.x (only 11.0.0-rc.3). Provider 10.0.3 requires EF Core `[10.0.4, 11.0.0)` |
 | Exit condition | Npgsql.EntityFrameworkCore.PostgreSQL ships stable 11.0.0. Then move all four to 11.x together |
 

@@ -76,6 +76,19 @@ alongside, so nothing could quietly fall back to .NET 10.
 - **Alternatives considered**: Adopting the provider's RC (violates
   FR-005). Waiting for the provider (the spec says the upgrade doesn't wait).
   EF Core 11 with an unmatched provider: NuGet resolution fails.
+- **Addendum (found during implementation, T020)**: The move to 10.0.15
+  wasn't free after all. The adapter now compiled against
+  `Microsoft.EntityFrameworkCore.Relational` 10.0.15, which it got through
+  `.Design`. But `.Design` is `PrivateAssets=all`, so the 10.0.15 copy doesn't
+  reach projects that reference the adapter. In `OrderSystem.Api` and
+  `OrderSystem.Adapters.IntegrationTests`, Relational resolved to 10.0.4 from
+  Npgsql's `[10.0.4, 11.0.0)` lower bound, and the build warned MSB3277.
+  The spike missed this because it never bumped EF Core. Fix: a direct
+  `Microsoft.EntityFrameworkCore.Relational` 10.0.15 reference in the
+  Postgres adapter. This is a real direct dependency, not a transitive pin
+  (spec 005's rule): the adapter uses Relational APIs itself (`ToTable`,
+  migrations). It moves to 11.x with the rest of the group on the same exit
+  condition.
 
 ### Decision 3 — Aspire 13.6.4 → 13.6.5, not 17.0.0
 
