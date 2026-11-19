@@ -125,12 +125,12 @@ US2 P2, US3 P3).
 
 ### Implementation for User Story 3
 
-- [ ] T025 [P] [US3] In `README.md`:
+- [X] T025 [P] [US3] In `README.md`:
   - Change the stack table row `C# / .NET 10` → `C# / .NET 11`.
   - Change the prerequisite `[.NET 10 SDK]` → `[.NET 11 SDK]`.
   - Add one sentence saying `global.json` pins the SDK feature band.
   - Change any other current-state `.NET 10` mention. Leave historical references in `specs/001`–`006` alone, since they record past decisions
-- [ ] T026 [US3] Verify quickstart §8: `grep -nE 'dotnet-version|net10\.0' .github/workflows/ci.yml` returns nothing, and `grep -nE '\.NET 1[01]' README.md` shows only .NET 11
+- [X] T026 [US3] Verify quickstart §8: `grep -nE 'dotnet-version|net10\.0' .github/workflows/ci.yml` returns nothing, and `grep -nE '\.NET 1[01]' README.md` shows only .NET 11
 
 **Checkpoint**: All user stories are complete.
 
