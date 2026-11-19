@@ -47,8 +47,8 @@ US2 P2, US3 P3).
 
 **Purpose**: Toolchain and a recorded baseline to compare against.
 
-- [ ] T001 Install the .NET 11 SDK (11.0.100 or a later 11.0.1xx) on the dev machine and confirm with `dotnet --list-sdks`. Keep the .NET 10 SDK too, for the FR-002 negative check in T008
-- [ ] T002 Record the baseline test counts per tier from the latest green `main` CI run (or a local `dotnet test` per project on `main`). Note them for SC-002 in the PR description: Domain.Tests (21), Application.Tests (36), Adapters.IntegrationTests (n), EndToEndTests (n)
+- [X] T001 Install the .NET 11 SDK (11.0.100 or a later 11.0.1xx) on the dev machine and confirm with `dotnet --list-sdks`. Keep the .NET 10 SDK too, for the FR-002 negative check in T008 — *Done 2026-11-19: SDK 11.0.100 used from a session-local install; .NET 10.0.302 still present.*
+- [X] T002 Record the baseline test counts per tier from the latest green `main` CI run (or a local `dotnet test` per project on `main`). Note them for SC-002 in the PR description: Domain.Tests (21), Application.Tests (36), Adapters.IntegrationTests (n), EndToEndTests (n) — *Baseline (CI run 42130608907, `main` @ ee99873): Domain 21, Application 36, Adapters.IntegrationTests 9, EndToEndTests 1.*
 
 ---
 
@@ -58,10 +58,10 @@ US2 P2, US3 P3).
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Check whether the .NET 10 security fix (Aspire 13.6.5 + Microsoft.AspNetCore.SignalR.StackExchangeRedis 10.0.15) has merged to `main`. If so, `git rebase origin/main` and skip T004–T005
-- [ ] T004 [P] *(only if T003 found no fix)* Bump `Aspire.AppHost.Sdk/13.6.4` → `13.6.5` and `Aspire.Hosting.{JavaScript,Kafka,PostgreSQL,RabbitMQ,Redis}` 13.6.4 → 13.6.5 in `hosts/OrderSystem.AppHost/OrderSystem.AppHost.csproj`, and `Aspire.Hosting.Testing` 13.6.4 → 13.6.5 in `tests/OrderSystem.EndToEndTests/OrderSystem.EndToEndTests.csproj` (research Decision 3: not 17.0)
-- [ ] T005 [P] *(only if T003 found no fix)* Bump `Microsoft.AspNetCore.SignalR.StackExchangeRedis` 10.0.14 → 10.0.15 in `hosts/OrderSystem.NotificationService/OrderSystem.NotificationService.csproj`. This is the GHSA-wr8v-9x5q-ggcm fix while still on net10.0. T018 takes it to 11.0.0
-- [ ] T006 `dotnet build OrderSystem.slnx` on the .NET 10 SDK succeeds with the audit gate on (0 errors). Commit as "Fix Aspire/SignalR advisories (prerequisite for 007)" if T004–T005 ran
+- [X] T003 Check whether the .NET 10 security fix (Aspire 13.6.5 + Microsoft.AspNetCore.SignalR.StackExchangeRedis 10.0.15) has merged to `main`. If so, `git rebase origin/main` and skip T004–T005 — *Not merged (PR #16 still open); T004–T005 applied here.*
+- [X] T004 [P] *(only if T003 found no fix)* Bump `Aspire.AppHost.Sdk/13.6.4` → `13.6.5` and `Aspire.Hosting.{JavaScript,Kafka,PostgreSQL,RabbitMQ,Redis}` 13.6.4 → 13.6.5 in `hosts/OrderSystem.AppHost/OrderSystem.AppHost.csproj`, and `Aspire.Hosting.Testing` 13.6.4 → 13.6.5 in `tests/OrderSystem.EndToEndTests/OrderSystem.EndToEndTests.csproj` (research Decision 3: not 17.0)
+- [X] T005 [P] *(only if T003 found no fix)* Bump `Microsoft.AspNetCore.SignalR.StackExchangeRedis` 10.0.14 → 10.0.15 in `hosts/OrderSystem.NotificationService/OrderSystem.NotificationService.csproj`. This is the GHSA-wr8v-9x5q-ggcm fix while still on net10.0. T018 takes it to 11.0.0
+- [X] T006 `dotnet build OrderSystem.slnx` on the .NET 10 SDK succeeds with the audit gate on (0 errors). Commit as "Fix Aspire/SignalR advisories (prerequisite for 007)" if T004–T005 ran
 
 **Checkpoint**: The build is green on .NET 10. Upgrade work can begin.
 
