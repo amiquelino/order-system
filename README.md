@@ -37,7 +37,7 @@ For the runtime picture (which services exist, how they talk over Kafka and Rabb
 
 | Layer | Technology |
 |---|---|
-| Language / runtime | C# / .NET 10 |
+| Language / runtime | C# / .NET 11 |
 | CQRS mediator | Wolverine (open source, MIT) |
 | Persistence | PostgreSQL via EF Core + Npgsql |
 | Event streaming | Apache Kafka via Confluent.Kafka |
@@ -50,7 +50,7 @@ For the runtime picture (which services exist, how they talk over Kafka and Rabb
 
 ## Prerequisites
 
-- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- [.NET 11 SDK](https://dotnet.microsoft.com/download) (11.0.100 or later 11.0 feature band; `global.json` pins it, and an older SDK fails the build with a message naming the version it needs)
 - [Node.js](https://nodejs.org/) 20+ and npm (only needed if you want to run the frontend outside of Aspire, or `npm install` its dependencies)
 - **Docker Desktop** (or another container runtime) running — Aspire launches Postgres, Kafka, RabbitMQ, and Redis as containers
 - Visual Studio 2022 17.13+ (native `.slnx` solution file support) if you want to run from the IDE, or the Aspire workload/tooling if using an older VS version
@@ -189,9 +189,9 @@ Test data comes from [Bogus](https://github.com/bchavez/Bogus) (`new Faker().Com
 
 **End-to-end test** — `OrderSystem.EndToEndTests`, the slowest and heaviest tier by far (several minutes; needs Docker, Node, and a Chromium install), and deliberately kept to a single test rather than a large suite. It uses [`Aspire.Hosting.Testing`](https://learn.microsoft.com/dotnet/aspire/testing/write-your-first-test) (`DistributedApplicationTestingBuilder.CreateAsync<Program>()`) to boot the *real* `AppHost` — every container, both Api replicas, the NotificationService, and the frontend — then drives it with a real headless [Playwright](https://playwright.dev/dotnet/) Chromium browser: fill in the create-order form, submit, and watch the status page reach `Confirmed` live via the real SignalR connection, no mocking or stubbing anywhere in the stack. Unlike the other tiers, this is the only one that goes through the frontend and the real Aspire-managed network topology, which is exactly why it's the tier that caught composition bugs nothing else could: a missing `NEXT_PUBLIC_API_URL` (`.WithReference(api)` alone doesn't set the specific env var Next.js needs), a CORS origin hardcoded to a port Aspire doesn't guarantee the frontend actually gets, and the SignalR multi-replica affinity gap that led to pulling `OrderSystem.NotificationService` out (see **Multi-instance support**) — none of which a unit or adapter-integration test could ever see, since they don't touch the frontend or Aspire's real proxy/networking.
 
-Needs the Playwright Chromium browser installed once (`dotnet build tests/OrderSystem.EndToEndTests && pwsh tests/OrderSystem.EndToEndTests/bin/Debug/net10.0/playwright.ps1 install chromium`, or the non-PowerShell equivalent via `Microsoft.Playwright.Program.Main(["install", "chromium"])`). On Linux without `--with-deps` (e.g. no passwordless `sudo`), headless Chromium may need system libraries like `libasound2` sourced manually if they're missing.
+Needs the Playwright Chromium browser installed once (`dotnet build tests/OrderSystem.EndToEndTests && pwsh tests/OrderSystem.EndToEndTests/bin/Debug/net11.0/playwright.ps1 install chromium`, or the non-PowerShell equivalent via `Microsoft.Playwright.Program.Main(["install", "chromium"])`). On Linux without `--with-deps` (e.g. no passwordless `sudo`), headless Chromium may need system libraries like `libasound2` sourced manually if they're missing.
 
-Every run saves a Playwright trace to `tests/OrderSystem.EndToEndTests/bin/Debug/net10.0/playwright-traces/`. It covers screenshots, DOM snapshots, network traffic and browser console. When the job fails in CI, the trace is uploaded as the `playwright-trace` artifact; open it at [trace.playwright.dev](https://trace.playwright.dev) or with `pwsh tests/OrderSystem.EndToEndTests/bin/Debug/net10.0/playwright.ps1 show-trace <file>`. The browser console and any failed or error responses are printed under the failed test's "Standard Output Messages" in the job log.
+Every run saves a Playwright trace to `tests/OrderSystem.EndToEndTests/bin/Debug/net11.0/playwright-traces/`. It covers screenshots, DOM snapshots, network traffic and browser console. When the job fails in CI, the trace is uploaded as the `playwright-trace` artifact; open it at [trace.playwright.dev](https://trace.playwright.dev) or with `pwsh tests/OrderSystem.EndToEndTests/bin/Debug/net11.0/playwright.ps1 show-trace <file>`. The browser console and any failed or error responses are printed under the failed test's "Standard Output Messages" in the job log.
 
 ## Dependency vulnerabilities
 
