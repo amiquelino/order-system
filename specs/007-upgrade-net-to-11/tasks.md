@@ -139,7 +139,7 @@ US2 P2, US3 P3).
 ## Phase 6: Polish & Cross-Cutting Concerns
 
 - [ ] T027 Run the full `specs/007-upgrade-net-to-11/quickstart.md` (§1–§8) top to bottom and record the result of each step in the PR description, including the per-tier counts compared with the T002 baseline (SC-002)
-- [ ] T028 Update `specs/007-upgrade-net-to-11/spec.md` **Status** to Implemented, with the PR number and merge commit, following specs 005 and 006
+- [X] T028 Update `specs/007-upgrade-net-to-11/spec.md` **Status** to Implemented, with the PR number and merge commit, following specs 005 and 006
 
 ---
 
