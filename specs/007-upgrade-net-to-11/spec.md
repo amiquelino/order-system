@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-18
 
-**Status**: Draft
+**Status**: Implemented, merged in PR #18 (`832bea5`, 2026-11-20); post-merge `main` CI green (run 44815265817: Domain 21, Application 36, Adapters.IntegrationTests 9, EndToEndTests 1, all on net11.0). 26/28 tasks done. Still open: T017 (manual golden-path run; the dev machine had no Docker, and the CI E2E test covers the same flow) and T027 (full quickstart, which is waiting only on T017's §7).
 
 **Input**: User description: "Upgrade .net to 11"
 
